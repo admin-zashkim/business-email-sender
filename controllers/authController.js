@@ -25,7 +25,12 @@ exports.signup = async (req, res) => {
             [email, hashedPassword, displayName || email.split('@')[0], token, expiry]
         );
 
-        await sendVerificationEmail(email, token);
+        // Try to send verification email, but don't fail signup if it fails
+        try {
+            await sendVerificationEmail(email, token);
+        } catch (emailErr) {
+            console.error('Failed to send verification email:', emailErr);
+        }
 
         res.status(201).json({ message: 'User created. Please verify your email.' });
     } catch (err) {
