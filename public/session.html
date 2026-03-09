@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session – BusinessEmailSender</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-brand">
+            <img src="/images/logo.png" alt="Logo">
+            <span>BusinessEmailSender</span>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard.html">Dashboard</a>
+            <a href="/profile.html">Profile</a>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="session-header">
+            <a href="/dashboard.html" class="back-link">← Back to Sessions</a>
+            <h1 id="sessionName"></h1>
+            <div class="session-stats">
+                <span id="sentCount">0</span> / <span id="maxEmails">10</span> emails sent
+            </div>
+        </div>
+
+        <div class="send-email-card glass">
+            <h2>Send New Email</h2>
+            <form id="sendEmailForm">
+                <div class="form-group">
+                    <label>Recipient Email</label>
+                    <input type="email" id="recipient" required>
+                </div>
+                <div class="form-group">
+                    <label>Recipient Confirm</label>
+                    <input type="email" id="recipientConfirm" required>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="subject" required>
+                </div>
+                <div class="form-group">
+                    <label>Body</label>
+                    <div class="body-options">
+                        <label><input type="radio" name="bodyType" value="plain" checked> Plain Text</label>
+                        <label><input type="radio" name="bodyType" value="html"> HTML</label>
+                    </div>
+                    <textarea id="body" rows="10" required></textarea>
+                    <div class="html-example" id="htmlExample" style="display: none;">
+                        <button type="button" id="insertPromo">Insert Promo HTML</button>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="previewBtn">Preview</button>
+                    <button type="submit" id="sendBtn">
+                        <span>Send Email</span>
+                        <div class="loading-dots" id="sendLoading" style="display: none;">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </button>
+                </div>
+            </form>
+            <div id="sendMessage" class="message"></div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div id="previewModal" class="modal">
+            <div class="modal-content glass preview-modal">
+                <span class="close">&times;</span>
+                <h2>Email Preview</h2>
+                <div id="previewContent"></div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2>Email History</h2>
+            <div id="historyList" class="history-grid"></div>
+            <div id="loadingHistory" class="loading-dots" style="display: none;">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/session.js"></script>
+</body>
+</html>

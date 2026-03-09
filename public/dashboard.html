@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – BusinessEmailSender</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-brand">
+            <img src="/images/logo.png" alt="Logo">
+            <span>BusinessEmailSender</span>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard.html" class="active">Dashboard</a>
+            <a href="/profile.html">Profile</a>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard-header">
+            <h1>Your Sessions</h1>
+            <button class="btn-primary" id="createSessionBtn">+ New Session</button>
+        </div>
+
+        <div id="sessionsList" class="sessions-grid"></div>
+        <div id="loadingSessions" class="loading-dots" style="display: none;">
+            <span></span><span></span><span></span>
+        </div>
+
+        <!-- Create Session Modal -->
+        <div id="sessionModal" class="modal">
+            <div class="modal-content glass">
+                <span class="close">&times;</span>
+                <h2>Create New Session</h2>
+                <form id="sessionForm">
+                    <div class="form-group">
+                        <label>Session Name</label>
+                        <input type="text" id="sessionName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gmail Address</label>
+                        <input type="email" id="sessionEmail" required>
+                        <small>This email will be used to send emails. Cannot be changed later.</small>
+                    </div>
+                    <div class="form-group password-field">
+                        <label>App Password</label>
+                        <input type="password" id="appPassword" required>
+                        <button type="button" class="toggle-password" data-target="appPassword">👁️</button>
+                    </div>
+                    <button type="submit" id="validateBtn">
+                        <span>Validate & Create</span>
+                        <div class="loading-dots" id="sessionLoading" style="display: none;">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </button>
+                    <div id="sessionMessage" class="message"></div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

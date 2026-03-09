@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusinessEmailSender – Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="auth-container glass">
+        <div class="logo-area">
+            <img src="/images/logo.png" alt="BusinessEmailSender">
+            <h1>BusinessEmailSender</h1>
+        </div>
+
+        <!-- Tab switching -->
+        <div class="auth-tabs">
+            <button class="tab-btn active" id="loginTab">Login</button>
+            <button class="tab-btn" id="signupTab">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form active">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="loginBtn">
+                    <span>Login</span>
+                    <div class="loading-dots" id="loginLoading" style="display: none;">
+                        <span></span><span></span><span></span>
+                    </div>
+                </button>
+            </div>
+            <div id="loginMessage" class="message"></div>
+            <div class="resend-link">
+                <a href="#" id="resendVerificationLink" style="display: none;">Resend verification email</a>
+            </div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="auth-form">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Display Name</label>
+                <input type="text" id="signupName" placeholder="Optional">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signupPassword" required>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="signupConfirm" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="signupBtn">
+                    <span>Sign Up</span>
+                    <div class="loading-dots" id="signupLoading" style="display: none;">
+                        <span></span><span></span><span></span>
+                    </div>
+                </button>
+            </div>
+            <div id="signupMessage" class="message"></div>
+        </form>
+    </div>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>

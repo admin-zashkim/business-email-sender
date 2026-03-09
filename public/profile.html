@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile – BusinessEmailSender</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-brand">
+            <img src="/images/logo.png" alt="Logo">
+            <span>BusinessEmailSender</span>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard.html">Dashboard</a>
+            <a href="/profile.html" class="active">Profile</a>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Profile</h1>
+
+        <div class="profile-grid">
+            <div class="profile-card glass">
+                <div class="avatar-section">
+                    <img src="/images/default-avatar.png" alt="Avatar" id="avatar">
+                </div>
+                <div class="info-section">
+                    <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                    <p><strong>Member since:</strong> <span id="memberSince"></span></p>
+                </div>
+
+                <div class="usage-bar">
+                    <label>Sessions Used: <span id="sessionCount">0</span> / 6</label>
+                    <div class="progress-bar">
+                        <div id="sessionProgress" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card glass">
+                <h2>Update Display Name</h2>
+                <form id="updateNameForm">
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="displayName" required>
+                    </div>
+                    <button type="submit" id="updateNameBtn">
+                        <span>Update</span>
+                        <div class="loading-dots" id="nameLoading" style="display: none;">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </button>
+                    <div id="nameMessage" class="message"></div>
+                </form>
+
+                <h2>Change Password</h2>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <button type="submit" id="changePasswordBtn">
+                        <span>Change Password</span>
+                        <div class="loading-dots" id="passwordLoading" style="display: none;">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </button>
+                    <div id="passwordMessage" class="message"></div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/profile.js"></script>
+</body>
+</html>
