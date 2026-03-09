@@ -9,7 +9,6 @@ exports.send = async (req, res) => {
     }
 
     try {
-        // Get session and verify ownership
         const sessionRes = await db.query(
             'SELECT * FROM sessions WHERE id = $1 AND user_id = $2',
             [sessionId, req.user.id]
@@ -19,22 +18,22 @@ exports.send = async (req, res) => {
         }
         const session = sessionRes.rows[0];
 
-        // Check limit
         if (session.sent_count >= session.max_emails) {
             return res.status(403).json({ error: 'Email limit reached for this session.' });
         }
 
-        // Decrypt app password
         const appPassword = decrypt(session.app_password_encrypted);
 
-        // Create transporter
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: { user: session.email, pass: appPassword },
+            connection: { family: 4 },
+            connectionTimeout: 5000,
+            greetingTimeout: 3000,
+            socketTimeout: 5000,
             tls: { rejectUnauthorized: false },
         });
 
-        // Prepare footer
         const footer = `<br><hr><small>This email was sent using <a href="https://businessemailsender.com">BusinessEmailSender</a></small>`;
         const htmlBody = isHtml ? body + footer : body.replace(/\n/g, '<br>') + footer;
         const textBody = isHtml ? undefined : body + '\n\n---\nSent via BusinessEmailSender (https://businessemailsender.com)';
@@ -47,13 +46,10 @@ exports.send = async (req, res) => {
             html: htmlBody,
         };
 
-        // Send email
         await transporter.sendMail(mailOptions);
 
-        // Update sent count
         await db.query('UPDATE sessions SET sent_count = sent_count + 1 WHERE id = $1', [sessionId]);
 
-        // Log success
         await db.query(
             `INSERT INTO email_history (session_id, recipient, subject, body, status)
              VALUES ($1, $2, $3, $4, $5)`,
@@ -63,7 +59,6 @@ exports.send = async (req, res) => {
         res.json({ success: true, message: 'Email sent successfully.' });
     } catch (err) {
         console.error('Email send error:', err);
-        // Log failure
         try {
             await db.query(
                 `INSERT INTO email_history (session_id, recipient, subject, body, status, error_message)
@@ -80,7 +75,6 @@ exports.send = async (req, res) => {
 exports.getHistory = async (req, res) => {
     const { sessionId } = req.params;
     try {
-        // Verify session ownership
         const session = await db.query('SELECT id FROM sessions WHERE id = $1 AND user_id = $2', [sessionId, req.user.id]);
         if (session.rows.length === 0) {
             return res.status(404).json({ error: 'Session not found.' });
@@ -100,7 +94,6 @@ exports.getHistory = async (req, res) => {
 exports.resend = async (req, res) => {
     const { historyId } = req.params;
     try {
-        // Get the failed email record and verify ownership through session
         const historyRes = await db.query(
             `SELECT eh.*, s.email as session_email, s.app_password_encrypted, s.user_id, s.id as session_id, s.sent_count, s.max_emails
              FROM email_history eh
@@ -113,17 +106,19 @@ exports.resend = async (req, res) => {
         }
         const record = historyRes.rows[0];
 
-        // Check session limit
         if (record.sent_count >= record.max_emails) {
             return res.status(403).json({ error: 'Email limit reached for this session.' });
         }
 
-        // Decrypt app password
         const appPassword = decrypt(record.app_password_encrypted);
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: { user: record.session_email, pass: appPassword },
+            connection: { family: 4 },
+            connectionTimeout: 5000,
+            greetingTimeout: 3000,
+            socketTimeout: 5000,
             tls: { rejectUnauthorized: false },
         });
 
@@ -141,10 +136,8 @@ exports.resend = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        // Update session sent count
         await db.query('UPDATE sessions SET sent_count = sent_count + 1 WHERE id = $1', [record.session_id]);
 
-        // Insert new success record (optional: keep original failed record as is)
         await db.query(
             `INSERT INTO email_history (session_id, recipient, subject, body, status)
              VALUES ($1, $2, $3, $4, $5)`,
