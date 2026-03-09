@@ -6,6 +6,10 @@ const transporter = nodemailer.createTransport({
         user: process.env.VERIFICATION_EMAIL,
         pass: process.env.VERIFICATION_EMAIL_PASS,
     },
+    connection: { family: 4 },          // force IPv4
+    connectionTimeout: 5000,             // 5 seconds
+    greetingTimeout: 3000,
+    socketTimeout: 5000,
 });
 
 module.exports = async (toEmail, token) => {
