@@ -4,10 +4,10 @@ async function validateAppPassword(email, appPassword) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: { user: email, pass: appPassword },
-        tls: { rejectUnauthorized: false },
         connectionTimeout: 5000,
         greetingTimeout: 3000,
         socketTimeout: 5000,
+        tls: { rejectUnauthorized: false },
     });
 
     try {
