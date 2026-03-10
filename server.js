@@ -8,22 +8,17 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Trust Render's proxy (required for rate‑limiting behind a proxy)
+// ✅ Add this line to trust Render's proxy
 app.set('trust proxy', 1);
 
 // Security middleware
-app.use(helmet({
-    contentSecurityPolicy: false,
-}));
-app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
-    credentials: true,
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ origin: process.env.FRONTEND_URL || '*', credentials: true }));
 
 // Rate limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -47,28 +42,12 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Optional: Auto‑initialize database tables on startup
-// Uncomment the following lines if you want the app to create tables automatically.
-// Make sure your schema.sql uses "CREATE TABLE IF NOT EXISTS" to avoid errors on restart.
-/*
-const initDb = require('./db/init');
-initDb().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-}).catch(err => {
-    console.error('Failed to initialize database:', err);
-    process.exit(1);
-});
-*/
-
-// If not using auto‑init, just start the server:
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
