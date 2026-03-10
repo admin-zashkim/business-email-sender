@@ -1,62 +1,6 @@
 const db = require('../db');
 const nodemailer = require('nodemailer');
-const dns = require('dns').promises;
-const net = require('net');
 const { decrypt } = require('../utils/encrypt');
-
-// Helper to test raw TCP connection
-async function testConnection(host, port, timeout = 5000) {
-    return new Promise((resolve) => {
-        const socket = new net.Socket();
-        const timer = setTimeout(() => {
-            socket.destroy();
-            resolve(false);
-        }, timeout);
-        socket.connect(port, host, () => {
-            clearTimeout(timer);
-            socket.destroy();
-            resolve(true);
-        });
-        socket.on('error', () => {
-            clearTimeout(timer);
-            socket.destroy();
-            resolve(false);
-        });
-    });
-}
-
-// Enhanced transporter creation with diagnostics
-async function createGmailTransporter(email, appPassword, port = 587) {
-    // Resolve SMTP host IPs
-    try {
-        const addresses = await dns.resolve4('smtp.gmail.com');
-        console.log(`Resolved smtp.gmail.com IPv4: ${addresses.join(', ')}`);
-    } catch (e) {
-        console.log('IPv4 lookup failed, trying AAAA...');
-        try {
-            const addresses = await dns.resolve6('smtp.gmail.com');
-            console.log(`Resolved smtp.gmail.com IPv6: ${addresses.join(', ')}`);
-        } catch (e2) {
-            console.log('DNS resolution failed completely');
-        }
-    }
-
-    // Test raw TCP connection
-    const canConnect = await testConnection('smtp.gmail.com', port);
-    console.log(`Raw TCP connection to smtp.gmail.com:${port} – ${canConnect ? 'SUCCESS' : 'FAILED'}`);
-
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: port,
-        secure: port === 465, // true for 465, false for 587
-        auth: { user: email, pass: appPassword },
-        connectionTimeout: 10000,
-        greetingTimeout: 5000,
-        socketTimeout: 10000,
-        tls: { rejectUnauthorized: false },
-    });
-    return transporter;
-}
 
 exports.send = async (req, res) => {
     const { sessionId, recipient, subject, body, isHtml } = req.body;
@@ -79,7 +23,13 @@ exports.send = async (req, res) => {
         }
 
         const appPassword = decrypt(session.app_password_encrypted);
-        const transporter = await createGmailTransporter(session.email, appPassword, 587); // try port 587 first
+
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: { user: session.email, pass: appPassword }
+        });
 
         const footer = `<br><hr><small>This email was sent using <a href="https://businessemailsender.com">BusinessEmailSender</a></small>`;
         const htmlBody = isHtml ? body + footer : body.replace(/\n/g, '<br>') + footer;
@@ -105,7 +55,7 @@ exports.send = async (req, res) => {
 
         res.json({ success: true, message: 'Email sent successfully.' });
     } catch (err) {
-        console.error('❌ Email send error:', err);
+        console.error('Email send error:', err);
         try {
             await db.query(
                 `INSERT INTO email_history (session_id, recipient, subject, body, status, error_message)
@@ -158,8 +108,13 @@ exports.resend = async (req, res) => {
         }
 
         const appPassword = decrypt(record.app_password_encrypted);
-        // Try port 587 first
-        const transporter = await createGmailTransporter(record.session_email, appPassword, 587);
+
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: { user: record.session_email, pass: appPassword }
+        });
 
         const footer = `<br><hr><small>This email was sent using <a href="https://businessemailsender.com">BusinessEmailSender</a></small>`;
         const htmlBody = record.body.includes('<') ? record.body + footer : record.body.replace(/\n/g, '<br>') + footer;
@@ -173,9 +128,7 @@ exports.resend = async (req, res) => {
             html: htmlBody,
         };
 
-        console.log('Attempting to resend email via:', record.session_email);
         await transporter.sendMail(mailOptions);
-        console.log('Resend successful');
 
         await db.query('UPDATE sessions SET sent_count = sent_count + 1 WHERE id = $1', [record.session_id]);
 
@@ -187,7 +140,7 @@ exports.resend = async (req, res) => {
 
         res.json({ success: true, message: 'Email resent successfully.' });
     } catch (err) {
-        console.error('❌ Resend error:', err);
+        console.error('Resend error:', err);
         res.status(500).json({ error: 'Failed to resend email: ' + err.message });
     }
 };
