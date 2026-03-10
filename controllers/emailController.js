@@ -27,7 +27,6 @@ exports.send = async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: { user: session.email, pass: appPassword },
-            connection: { family: 4 },
             connectionTimeout: 5000,
             greetingTimeout: 3000,
             socketTimeout: 5000,
@@ -115,7 +114,6 @@ exports.resend = async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: { user: record.session_email, pass: appPassword },
-            connection: { family: 4 },
             connectionTimeout: 5000,
             greetingTimeout: 3000,
             socketTimeout: 5000,
