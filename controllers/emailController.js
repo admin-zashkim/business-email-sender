@@ -57,7 +57,7 @@ exports.send = async (req, res) => {
 
         res.json({ success: true, message: 'Email sent successfully.' });
     } catch (err) {
-        console.error('Email send error:', err);
+        console.error('❌ Email send error:', err); // Enhanced logging
         try {
             await db.query(
                 `INSERT INTO email_history (session_id, recipient, subject, body, status, error_message)
@@ -111,13 +111,16 @@ exports.resend = async (req, res) => {
 
         const appPassword = decrypt(record.app_password_encrypted);
 
+        // Enhanced transporter with fallback SMTP settings
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false, // use TLS
             auth: { user: record.session_email, pass: appPassword },
             connectionTimeout: 5000,
             greetingTimeout: 3000,
             socketTimeout: 5000,
-            tls: { rejectUnauthorized: false },
+            tls: { rejectUnauthorized: false, ciphers: 'SSLv3' }, // some environments need this
         });
 
         const footer = `<br><hr><small>This email was sent using <a href="https://businessemailsender.com">BusinessEmailSender</a></small>`;
@@ -132,7 +135,9 @@ exports.resend = async (req, res) => {
             html: htmlBody,
         };
 
+        console.log('Attempting to resend email via:', record.session_email); // log before sending
         await transporter.sendMail(mailOptions);
+        console.log('Resend successful');
 
         await db.query('UPDATE sessions SET sent_count = sent_count + 1 WHERE id = $1', [record.session_id]);
 
@@ -144,7 +149,7 @@ exports.resend = async (req, res) => {
 
         res.json({ success: true, message: 'Email resent successfully.' });
     } catch (err) {
-        console.error('Resend error:', err);
+        console.error('❌ Resend error:', err); // full error log
         res.status(500).json({ error: 'Failed to resend email: ' + err.message });
     }
 };
